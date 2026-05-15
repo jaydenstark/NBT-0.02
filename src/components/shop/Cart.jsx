@@ -23,7 +23,7 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove }) => {
               <div>
                 <h4 style={{ margin: 0 }}>{item.name}</h4>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--secondary)', fontWeight: 600 }}>Size: {item.size}</p>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>GH₵ {item.price.toLocaleString()}</p>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>GH₵ {item.price.toLocaleString('en-US')}</p>
               </div>
               <button 
                 onClick={() => onRemove(index)}
@@ -39,7 +39,7 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove }) => {
       <div style={{ padding: '2rem', background: 'var(--bg-surface)', borderTop: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontWeight: 700, fontSize: '1.2rem' }}>
           <span>Total:</span>
-          <span>GH₵ {total.toLocaleString()}</span>
+          <span>GH₵ {total.toLocaleString('en-US')}</span>
         </div>
         <button className="btn btn-primary" style={{ width: '100%', padding: '15px' }}>Proceed to Checkout</button>
       </div>

@@ -59,7 +59,7 @@ const CatalogPage = ({ onClose }) => {
                       <div style={{ display: 'flex', gap: '1rem' }}>
                         {product.sizes.map(s => (
                           <div key={s.size} style={{ fontSize: '0.9rem' }}>
-                            <strong>{s.size}:</strong> GH₵ {s.price}
+                            <strong>{s.size}:</strong> GH₵ {s.price.toLocaleString('en-US')}
                           </div>
                         ))}
                       </div>
@@ -94,7 +94,7 @@ const CatalogPage = ({ onClose }) => {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem', marginTop: '5px' }}>
                         {product.sizes.map(s => (
                           <div key={s.size} style={{ fontSize: '0.9rem', background: '#f8fafc', padding: '5px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-                            <strong>{s.size}:</strong> GH₵ {s.price.toLocaleString()}
+                            <strong>{s.size}:</strong> GH₵ {s.price.toLocaleString('en-US')}
                           </div>
                         ))}
                       </div>

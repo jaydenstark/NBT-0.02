@@ -43,7 +43,7 @@ const ProductCard = ({ product, onAddToCart }) => {
           <div className="product-price">
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>Starting from</span>
             <br />
-            GH₵ {selectedSize.price.toLocaleString()}
+            GH₵ {selectedSize.price.toLocaleString('en-US')}
           </div>
           <button 
             className="btn btn-primary" 

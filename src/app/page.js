@@ -53,21 +53,6 @@ export default function Home() {
         
         <section id="about" className="section" style={{ background: 'var(--primary)', color: 'white' }}>
           <div className="container">
-            <style jsx>{`
-              .about-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 4rem;
-                align-items: center;
-              }
-              @media (max-width: 768px) {
-                .about-grid {
-                  grid-template-columns: 1fr;
-                  gap: 3rem;
-                  text-align: center;
-                }
-              }
-            `}</style>
             <div className="about-grid">
               <div>
                 <h2 style={{ fontSize: 'clamp(2rem, 5vw, 2.5rem)', marginBottom: '1.5rem' }}>Precision Chemical Engineering</h2>

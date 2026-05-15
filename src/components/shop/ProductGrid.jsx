@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import ProductCard from './ProductCard';
 import { products, brands, categories } from '../../data/products';

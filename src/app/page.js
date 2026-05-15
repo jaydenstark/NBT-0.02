@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Navbar from '../components/layout/Navbar';
 import Hero from '../components/layout/Hero';
 import ProductGrid from '../components/shop/ProductGrid';

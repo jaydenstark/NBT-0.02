@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const ProductCard = ({ product, onAddToCart }) => {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);

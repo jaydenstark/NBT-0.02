@@ -1,7 +1,7 @@
 'use client';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ProductCard from './ProductCard';
-import { products, brands, categories } from '../../data/products';
+import { products, brands } from '../../data/products';
 
 const ProductGrid = ({ onAddToCart }) => {
   const [catalogType, setCatalogType] = useState('retail');

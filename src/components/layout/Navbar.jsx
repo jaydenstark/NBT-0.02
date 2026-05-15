@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 
 const Navbar = ({ cartCount, onCartClick, onCatalogClick, onHomeClick }) => {
   return (

@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 
 const Cart = ({ isOpen, onClose, cartItems, onRemove }) => {
   const total = cartItems.reduce((acc, item) => acc + item.price, 0);

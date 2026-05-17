@@ -6,8 +6,10 @@ import { storage } from '../../lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 export default function AdminDashboard() {
-  const { products, isLoaded, addProduct, deleteProduct } = useProducts();
+  const { products, isLoaded, addProduct, deleteProduct, updateProduct } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [newProduct, setNewProduct] = useState({
@@ -53,7 +55,12 @@ export default function AdminDashboard() {
     }
 
     const finalProduct = { ...newProduct, image: imageUrl };
-    await addProduct(finalProduct);
+    
+    if (isEditing) {
+      await updateProduct({ ...finalProduct, id: editingProductId });
+    } else {
+      await addProduct(finalProduct);
+    }
     
     setIsModalOpen(false);
     setIsUploading(false);
@@ -70,6 +77,36 @@ export default function AdminDashboard() {
     });
   };
 
+  const handleOpenAddModal = () => {
+    setNewProduct({
+      name: '',
+      brand: 'Neat Product',
+      type: 'retail',
+      description: '',
+      specs: '',
+      sizes: [{ size: '', price: 0 }],
+      image: '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png'
+    });
+    setEditingProductId(null);
+    setIsEditing(false);
+    setIsModalOpen(true);
+  };
+
+  const handleEditProduct = (product) => {
+    setNewProduct({
+      name: product.name || '',
+      brand: product.brand || 'Neat Product',
+      type: product.type || 'retail',
+      description: product.description || '',
+      specs: product.specs || '',
+      sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [{ size: '', price: 0 }],
+      image: product.image || '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png'
+    });
+    setEditingProductId(product.id);
+    setIsEditing(true);
+    setIsModalOpen(true);
+  };
+
   if (!isLoaded) return <div style={{ padding: '40px' }}>Loading Admin Dashboard...</div>;
 
   return (
@@ -79,7 +116,7 @@ export default function AdminDashboard() {
           <h1>NBT Admin Dashboard</h1>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <a href="/" className="btn btn-outline" style={{ textDecoration: 'none' }}>View Live Site</a>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>+ Add New Product</button>
+            <button className="btn btn-primary" onClick={handleOpenAddModal}>+ Add New Product</button>
           </div>
         </div>
 
@@ -132,6 +169,12 @@ export default function AdminDashboard() {
                   </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #e2e8f0', textAlign: 'right' }}>
                     <button 
+                      onClick={() => handleEditProduct(product)}
+                      style={{ background: '#e0f2fe', color: '#0369a1', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', marginRight: '10px' }}
+                    >
+                      Edit
+                    </button>
+                    <button 
                       onClick={() => deleteProduct(product.id)}
                       style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
                     >
@@ -150,7 +193,7 @@ export default function AdminDashboard() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
           <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0 }}>Add New Product</h2>
+              <h2 style={{ margin: 0 }}>{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
             </div>
             
@@ -204,7 +247,7 @@ export default function AdminDashboard() {
               </div>
 
               <button type="submit" disabled={isUploading} className="btn btn-primary" style={{ marginTop: '10px', padding: '15px', opacity: isUploading ? 0.7 : 1 }}>
-                {isUploading ? 'Uploading...' : 'Save Product'}
+                {isUploading ? 'Uploading...' : isEditing ? 'Update Product' : 'Save Product'}
               </button>
             </form>
           </div>

@@ -1,7 +1,5 @@
 'use client';
-import { products } from '../../data/products';
-
-const CatalogPage = ({ onClose }) => {
+const CatalogPage = ({ onClose, products = [] }) => {
   const printCatalog = () => {
     window.print();
   };

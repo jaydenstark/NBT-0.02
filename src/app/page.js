@@ -5,8 +5,10 @@ import Hero from '../components/layout/Hero';
 import ProductGrid from '../components/shop/ProductGrid';
 import Cart from '../components/shop/Cart';
 import CatalogPage from '../components/shop/CatalogPage';
+import { useProducts } from '../hooks/useProducts';
 
 export default function Home() {
+  const { products, isLoaded } = useProducts();
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
@@ -49,7 +51,11 @@ export default function Home() {
           </div>
         </div>
 
-        <ProductGrid onAddToCart={handleAddToCart} />
+        {isLoaded ? (
+          <ProductGrid onAddToCart={handleAddToCart} products={products} />
+        ) : (
+          <div style={{ padding: '60px', textAlign: 'center' }}>Loading products...</div>
+        )}
         
         <section id="about" className="section" style={{ background: 'var(--primary)', color: 'white' }}>
           <div className="container">
@@ -121,6 +127,9 @@ export default function Home() {
               <li>Industrial Cleaning</li>
               <li>Food Grade Chemicals</li>
               <li>Bulk Distribution</li>
+              <li style={{ marginTop: '1rem' }}>
+                <a href="/admin" style={{ color: 'var(--secondary)', textDecoration: 'none', fontWeight: 600 }}>Admin Login</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -137,7 +146,7 @@ export default function Home() {
       />
 
       {isCatalogOpen && (
-        <CatalogPage onClose={() => setIsCatalogOpen(false)} />
+        <CatalogPage onClose={() => setIsCatalogOpen(false)} products={products} />
       )}
     </div>
   );

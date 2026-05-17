@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { products as defaultProducts } from '../data/products';
 
@@ -49,7 +49,8 @@ export function useProducts() {
     try {
       const productsRef = collection(db, 'products');
       // Remove any existing id so Firestore generates a new unique one
-      const { id, ...productData } = product; 
+      // eslint-disable-next-line no-unused-vars
+      const { id, ...productData } = product;
       await addDoc(productsRef, productData);
     } catch (error) {
       console.error("Error adding product: ", error);

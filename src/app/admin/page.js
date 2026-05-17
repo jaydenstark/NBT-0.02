@@ -175,7 +175,11 @@ export default function AdminDashboard() {
                       Edit
                     </button>
                     <button 
-                      onClick={() => deleteProduct(product.id)}
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to delete ${product.name}? This action cannot be undone.`)) {
+                          deleteProduct(product.id);
+                        }
+                      }}
                       style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
                     >
                       Delete

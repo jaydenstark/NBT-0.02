@@ -107,7 +107,45 @@ export default function AdminDashboard() {
     setIsModalOpen(true);
   };
 
-  if (!isLoaded) return <div style={{ padding: '40px' }}>Loading Admin Dashboard...</div>;
+  if (!isLoaded) return (
+    <div style={{ padding: '40px', background: '#f8fafc', minHeight: '100vh', color: '#333' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <h1>NBT Admin Dashboard</h1>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ width: '120px', height: '40px', background: '#e2e8f0', borderRadius: '6px', animation: 'pulse 1.5s infinite' }}></div>
+            <div style={{ width: '160px', height: '40px', background: '#e2e8f0', borderRadius: '6px', animation: 'pulse 1.5s infinite' }}></div>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', height: '116px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div style={{ height: '20px', width: '50%', background: '#e2e8f0', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+              <div style={{ height: '40px', width: '30%', background: '#e2e8f0', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+            </div>
+          ))}
+        </div>
+        <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', overflow: 'hidden' }}>
+          <div style={{ height: '50px', background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', animation: 'pulse 1.5s infinite' }}></div>
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} style={{ height: '70px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', padding: '0 15px', gap: '20px' }}>
+              <div style={{ height: '20px', width: '20%', background: '#e2e8f0', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+              <div style={{ height: '20px', width: '15%', background: '#e2e8f0', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+              <div style={{ height: '20px', width: '10%', background: '#e2e8f0', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+              <div style={{ height: '20px', width: '25%', background: '#e2e8f0', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+              <div style={{ height: '30px', width: '15%', marginLeft: 'auto', background: '#e2e8f0', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+            </div>
+          ))}
+        </div>
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ padding: '40px', background: '#f8fafc', minHeight: '100vh', color: '#333' }}>

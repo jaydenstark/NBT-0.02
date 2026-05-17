@@ -2,10 +2,14 @@
 
 import { useState } from 'react';
 import { useProducts } from '../../hooks/useProducts';
+import { storage } from '../../lib/firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 export default function AdminDashboard() {
   const { products, isLoaded, addProduct, deleteProduct } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: '',
     brand: 'Neat Product',
@@ -29,10 +33,31 @@ export default function AdminDashboard() {
     setNewProduct({ ...newProduct, sizes: updatedSizes });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addProduct(newProduct);
+    setIsUploading(true);
+
+    let imageUrl = newProduct.image;
+
+    if (imageFile) {
+      try {
+        const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+        const uploadTask = await uploadBytesResumable(storageRef, imageFile);
+        imageUrl = await getDownloadURL(uploadTask.ref);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Failed to upload image.");
+        setIsUploading(false);
+        return;
+      }
+    }
+
+    const finalProduct = { ...newProduct, image: imageUrl };
+    await addProduct(finalProduct);
+    
     setIsModalOpen(false);
+    setIsUploading(false);
+    setImageFile(null);
     // Reset form
     setNewProduct({
       name: '',
@@ -131,6 +156,10 @@ export default function AdminDashboard() {
             
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 600 }}>Product Image</label>
+                <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+              </div>
+              <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 600 }}>Product Name</label>
                 <input required type="text" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
               </div>
@@ -174,7 +203,9 @@ export default function AdminDashboard() {
                 <button type="button" onClick={handleAddSize} style={{ background: 'none', border: '1px dashed #ccc', padding: '8px', width: '100%', borderRadius: '4px', cursor: 'pointer' }}>+ Add Another Size</button>
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ marginTop: '10px', padding: '15px' }}>Save Product</button>
+              <button type="submit" disabled={isUploading} className="btn btn-primary" style={{ marginTop: '10px', padding: '15px', opacity: isUploading ? 0.7 : 1 }}>
+                {isUploading ? 'Uploading...' : 'Save Product'}
+              </button>
             </form>
           </div>
         </div>

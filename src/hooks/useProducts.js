@@ -18,12 +18,19 @@ export function useProducts() {
       if (snapshot.empty) {
         // If Firestore is completely empty, seed it with the default static data
         console.log("Database empty, seeding default products...");
-        const seedPromises = defaultProducts.map(async (prod) => {
-          // Use the original static ID as the document ID for consistency
-          const docRef = doc(db, 'products', prod.id.toString());
-          await setDoc(docRef, prod);
-        });
-        await Promise.all(seedPromises);
+        setProducts(defaultProducts);
+        setIsLoaded(true);
+        
+        try {
+          const seedPromises = defaultProducts.map(async (prod) => {
+            // Use the original static ID as the document ID for consistency
+            const docRef = doc(db, 'products', prod.id.toString());
+            await setDoc(docRef, prod);
+          });
+          await Promise.all(seedPromises);
+        } catch (err) {
+          console.error("Failed to seed database. Check your Firestore rules:", err);
+        }
       } else {
         // Load data from Firestore
         const loadedProducts = snapshot.docs.map(doc => ({

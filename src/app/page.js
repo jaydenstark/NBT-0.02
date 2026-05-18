@@ -5,6 +5,7 @@ import Hero from '../components/layout/Hero';
 import ProductGrid from '../components/shop/ProductGrid';
 import Cart from '../components/shop/Cart';
 import CatalogPage from '../components/shop/CatalogPage';
+import FloatingContact from '../components/layout/FloatingContact';
 import { useProducts } from '../hooks/useProducts';
 
 export default function Home() {
@@ -143,11 +144,14 @@ export default function Home() {
         onClose={() => setIsCartOpen(false)} 
         cartItems={cartItems}
         onRemove={handleRemoveFromCart}
+        onClearCart={() => setCartItems([])}
       />
 
       {isCatalogOpen && (
         <CatalogPage onClose={() => setIsCatalogOpen(false)} products={products} />
       )}
+
+      <FloatingContact />
     </div>
   );
 }

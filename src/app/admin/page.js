@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useProducts } from '../../hooks/useProducts';
-import { storage } from '../../lib/firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 export default function AdminDashboard() {
   const { products, isLoaded, addProduct, deleteProduct, updateProduct } = useProducts();
@@ -43,12 +41,32 @@ export default function AdminDashboard() {
 
     if (imageFile) {
       try {
-        const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-        const uploadTask = await uploadBytesResumable(storageRef, imageFile);
-        imageUrl = await getDownloadURL(uploadTask.ref);
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+        
+        if (!cloudName || !uploadPreset) {
+          throw new Error("Cloudinary configuration is missing in environment variables.");
+        }
+
+        const formData = new FormData();
+        formData.append('file', imageFile);
+        formData.append('upload_preset', uploadPreset);
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || "Failed to upload image to Cloudinary");
+        }
+
+        const data = await response.json();
+        imageUrl = data.secure_url;
       } catch (error) {
         console.error("Error uploading image:", error);
-        alert("Failed to upload image.");
+        alert("Failed to upload image: " + error.message);
         setIsUploading(false);
         return;
       }

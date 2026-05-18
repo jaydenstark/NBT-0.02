@@ -1,3 +1,4 @@
+/* global process */
 'use client';
 
 import { useState } from 'react';

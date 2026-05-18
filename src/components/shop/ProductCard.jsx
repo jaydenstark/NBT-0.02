@@ -44,6 +44,11 @@ const ProductCard = ({ product, onAddToCart }) => {
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>Starting from</span>
             <br />
             GH₵ {selectedSize.price.toLocaleString('en-US')}
+            {selectedSize.qtyInBox > 1 && (
+              <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--secondary)', marginTop: '2px' }}>
+                ({selectedSize.qtyInBox} pieces / box)
+              </span>
+            )}
           </div>
           <button 
             className="btn btn-primary" 
@@ -52,10 +57,6 @@ const ProductCard = ({ product, onAddToCart }) => {
           >
             Add to Cart
           </button>
-        </div>
-        
-        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', fontSize: '0.75rem', color: 'var(--secondary)', fontWeight: 600 }}>
-          {product.specs}
         </div>
       </div>
     </div>

@@ -43,7 +43,8 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove, onClearCart }) => {
       message += `*Order Items:*\n`;
       
       cartItems.forEach((item, index) => {
-        message += `${index + 1}. ${item.name} (${item.size}) - GH₵ ${item.price.toLocaleString('en-US')}\n`;
+        const qtyText = item.qtyInBox > 1 ? ` (${item.qtyInBox} pieces/box)` : '';
+        message += `${index + 1}. ${item.name} (${item.size})${qtyText} - GH₵ ${item.price.toLocaleString('en-US')}\n`;
       });
       
       message += `\n*Total Amount:* GH₵ ${total.toLocaleString('en-US')}`;
@@ -90,7 +91,9 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove, onClearCart }) => {
                 <div key={index} style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <h4 style={{ margin: 0 }}>{item.name}</h4>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--secondary)', fontWeight: 600 }}>Size: {item.size}</p>
+                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--secondary)', fontWeight: 600 }}>
+                      Size: {item.size} {item.qtyInBox > 1 && `(${item.qtyInBox} pcs/box)`}
+                    </p>
                     <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>GH₵ {item.price.toLocaleString('en-US')}</p>
                   </div>
                   <button 

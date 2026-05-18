@@ -1,8 +1,9 @@
 /* global process */
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useProducts } from '../../hooks/useProducts';
+import * as XLSX from 'xlsx';
 
 export default function AdminDashboard() {
   const { products, isLoaded, addProduct, deleteProduct, updateProduct } = useProducts();
@@ -11,26 +12,26 @@ export default function AdminDashboard() {
   const [editingProductId, setEditingProductId] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const [newProduct, setNewProduct] = useState({
     name: '',
     brand: 'Neat Product',
     type: 'retail',
     description: '',
-    specs: '',
-    sizes: [{ size: '', price: 0 }],
+    sizes: [{ size: '', price: 0, qtyInBox: 1 }],
     image: '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png' // Default placeholder
   });
 
   const handleAddSize = () => {
     setNewProduct({
       ...newProduct,
-      sizes: [...newProduct.sizes, { size: '', price: 0 }]
+      sizes: [...newProduct.sizes, { size: '', price: 0, qtyInBox: 1 }]
     });
   };
 
   const handleSizeChange = (index, field, value) => {
     const updatedSizes = [...newProduct.sizes];
-    updatedSizes[index][field] = field === 'price' ? parseFloat(value) || 0 : value;
+    updatedSizes[index][field] = (field === 'price' || field === 'qtyInBox') ? parseFloat(value) || 0 : value;
     setNewProduct({ ...newProduct, sizes: updatedSizes });
   };
 
@@ -85,15 +86,69 @@ export default function AdminDashboard() {
     setIsUploading(false);
     setImageFile(null);
     // Reset form
+    // Reset form
     setNewProduct({
       name: '',
       brand: 'Neat Product',
       type: 'retail',
       description: '',
-      specs: '',
-      sizes: [{ size: '', price: 0 }],
+      sizes: [{ size: '', price: 0, qtyInBox: 1 }],
       image: '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png'
     });
+  };
+
+  const handleExcelUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+
+        let successCount = 0;
+
+        for (const row of data) {
+          if (!row.Name) continue; // Skip empty rows
+
+          // Construct product object from Excel row
+          const productData = {
+            name: row.Name,
+            brand: row.Brand || 'Neat Product',
+            type: row.Type?.toLowerCase() === 'industrial' ? 'industrial' : 'retail',
+            category: row.Category || 'General',
+            description: row.Description || '',
+            image: row.Image || '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png',
+            sizes: [
+              {
+                size: row.Size || '1',
+                price: parseFloat(String(row.Price || '0').replace(/[^0-9.]/g, '')) || 0,
+                qtyInBox: parseInt(row['Qty In Box'] || row.QtyInBox) || 1
+              }
+            ]
+          };
+
+          await addProduct(productData);
+          successCount++;
+        }
+
+        alert(`Successfully imported ${successCount} products from Excel!`);
+      } catch (error) {
+        console.error("Error importing Excel:", error);
+        alert("Failed to parse Excel file. Please ensure it matches the template format.");
+      } finally {
+        setIsUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+
+    reader.readAsBinaryString(file);
   };
 
   const handleOpenAddModal = () => {
@@ -102,8 +157,7 @@ export default function AdminDashboard() {
       brand: 'Neat Product',
       type: 'retail',
       description: '',
-      specs: '',
-      sizes: [{ size: '', price: 0 }],
+      sizes: [{ size: '', price: 0, qtyInBox: 1 }],
       image: '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png'
     });
     setEditingProductId(null);
@@ -117,8 +171,7 @@ export default function AdminDashboard() {
       brand: product.brand || 'Neat Product',
       type: product.type || 'retail',
       description: product.description || '',
-      specs: product.specs || '',
-      sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [{ size: '', price: 0 }],
+      sizes: product.sizes && product.sizes.length > 0 ? product.sizes.map(s => ({...s, qtyInBox: s.qtyInBox || 1})) : [{ size: '', price: 0, qtyInBox: 1 }],
       image: product.image || '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png'
     });
     setEditingProductId(product.id);
@@ -171,9 +224,26 @@ export default function AdminDashboard() {
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <h1>NBT Admin Dashboard</h1>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <a href="/" className="btn btn-outline" style={{ textDecoration: 'none' }}>View Live Site</a>
-            <button className="btn btn-primary" onClick={handleOpenAddModal}>+ Add New Product</button>
+            
+            <input 
+              type="file" 
+              accept=".xlsx, .xls" 
+              onChange={handleExcelUpload} 
+              ref={fileInputRef}
+              style={{ display: 'none' }} 
+              id="excel-upload"
+            />
+            <label 
+              htmlFor="excel-upload" 
+              className="btn btn-outline" 
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', opacity: isUploading ? 0.5 : 1 }}
+            >
+              {isUploading ? 'Importing...' : '📄 Bulk Upload (.xlsx)'}
+            </label>
+
+            <button className="btn btn-primary" onClick={handleOpenAddModal} disabled={isUploading}>+ Add New Product</button>
           </div>
         </div>
 
@@ -225,22 +295,30 @@ export default function AdminDashboard() {
                     {product.sizes.map(s => `${s.size} (GH₵${s.price})`).join(', ')}
                   </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #e2e8f0', textAlign: 'right' }}>
-                    <button 
-                      onClick={() => handleEditProduct(product)}
-                      style={{ background: '#e0f2fe', color: '#0369a1', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', marginRight: '10px' }}
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      onClick={() => {
-                        if (window.confirm(`Are you sure you want to delete ${product.name}? This action cannot be undone.`)) {
-                          deleteProduct(product.id);
-                        }
-                      }}
-                      style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
-                    >
-                      Delete
-                    </button>
+                    {product.source === 'sheet' ? (
+                      <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                        Edit in Google Sheets
+                      </span>
+                    ) : (
+                      <>
+                        <button 
+                          onClick={() => handleEditProduct(product)}
+                          style={{ background: '#e0f2fe', color: '#0369a1', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', marginRight: '10px' }}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete ${product.name}? This action cannot be undone.`)) {
+                              deleteProduct(product.id);
+                            }
+                          }}
+                          style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -291,17 +369,13 @@ export default function AdminDashboard() {
                 <textarea required value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', minHeight: '80px' }} />
               </div>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 600 }}>Specifications (e.g., Highly Concentrated | Multi-Surface)</label>
-                <input required type="text" value={newProduct.specs} onChange={e => setNewProduct({...newProduct, specs: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
-              </div>
-
               <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px' }}>
                 <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600 }}>Sizes & Pricing</label>
                 {newProduct.sizes.map((sizeObj, index) => (
                   <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                     <input required type="text" placeholder="Size (e.g., 500ml)" value={sizeObj.size} onChange={e => handleSizeChange(index, 'size', e.target.value)} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
                     <input required type="number" placeholder="Price (GH₵)" value={sizeObj.price || ''} onChange={e => handleSizeChange(index, 'price', e.target.value)} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                    <input required type="number" placeholder="Qty in Box" value={sizeObj.qtyInBox || 1} onChange={e => handleSizeChange(index, 'qtyInBox', e.target.value)} style={{ flex: 0.5, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} title="Quantity per Box/Case" />
                   </div>
                 ))}
                 <button type="button" onClick={handleAddSize} style={{ background: 'none', border: '1px dashed #ccc', padding: '8px', width: '100%', borderRadius: '4px', cursor: 'pointer' }}>+ Add Another Size</button>

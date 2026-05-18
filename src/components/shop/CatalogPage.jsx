@@ -48,10 +48,7 @@ const CatalogPage = ({ onClose, products = [] }) => {
                   <h3 style={{ margin: '0 0 10px 0', color: 'var(--primary)' }}>{product.name}</h3>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{product.description}</p>
                   <div style={{ display: 'flex', gap: '2rem' }}>
-                    <div>
-                      <span style={{ fontWeight: 700, fontSize: '0.7rem', color: 'var(--secondary)' }}>SPECIFICATIONS</span>
-                      <p style={{ margin: 0, fontSize: '0.9rem' }}>{product.specs}</p>
-                    </div>
+
                     <div>
                       <span style={{ fontWeight: 700, fontSize: '0.7rem', color: 'var(--secondary)' }}>PRICING</span>
                       <div style={{ display: 'flex', gap: '1rem' }}>
@@ -83,10 +80,7 @@ const CatalogPage = ({ onClose, products = [] }) => {
                   <h3 style={{ margin: '0 0 10px 0', color: 'var(--primary)' }}>{product.name}</h3>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{product.description}</p>
                   <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-                    <div>
-                      <span style={{ fontWeight: 700, fontSize: '0.7rem', color: 'var(--secondary)' }}>SPECIFICATIONS</span>
-                      <p style={{ margin: 0, fontSize: '0.9rem' }}>{product.specs}</p>
-                    </div>
+
                     <div style={{ flex: 1 }}>
                       <span style={{ fontWeight: 700, fontSize: '0.7rem', color: 'var(--secondary)' }}>INDUSTRIAL PRICING</span>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem', marginTop: '5px' }}>

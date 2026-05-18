@@ -4,53 +4,91 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { products as defaultProducts } from '../data/products';
+import Papa from 'papaparse';
 
 export function useProducts() {
   const [products, setProducts] = useState([]);
+  const [sheetProducts, setSheetProducts] = useState([]);
+  const [firestoreProducts, setFirestoreProducts] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isFirestoreLoaded, setIsFirestoreLoaded] = useState(false);
 
   useEffect(() => {
-    // Reference to the 'products' collection in Firestore
+    // 1. Fetch from Google Sheets
+    const fetchGoogleSheets = async () => {
+      try {
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1pHzmSNsXpPdrJcGQ5kI4ZNsAaUNVeXt6knle7C_sNG0/export?format=csv&gid=1847675030';
+        const response = await fetch(sheetUrl);
+        const csvText = await response.text();
+        
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            const parsedProducts = [];
+            for (const row of results.data) {
+              if (!row.Name) continue;
+              
+              parsedProducts.push({
+                id: `sheet_${row.Name}_${row.Size}`,
+                name: row.Name,
+                brand: row.Brand || 'Neat Product',
+                type: row.Type?.toLowerCase() === 'industrial' ? 'industrial' : 'retail',
+                category: row.Category || 'General',
+                description: row.Description || '',
+                image: row.Image || '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png',
+                sizes: [
+                  {
+                    size: row.Size || '1',
+                    price: parseFloat(String(row.Price || '0').replace(/[^0-9.]/g, '')) || 0,
+                    qtyInBox: parseInt(row['Qty In Box'] || row.QtyInBox) || 1
+                  }
+                ],
+                source: 'sheet'
+              });
+            }
+            setSheetProducts(parsedProducts);
+          },
+          error: (error) => {
+            console.error("Error parsing Google Sheet CSV:", error);
+          }
+        });
+      } catch (error) {
+        console.error("Failed to fetch Google Sheet:", error);
+      }
+    };
+
+    fetchGoogleSheets();
+
+    // 2. Reference to the 'products' collection in Firestore
     const productsRef = collection(db, 'products');
 
     // Real-time listener for products
     const unsubscribe = onSnapshot(productsRef, async (snapshot) => {
-      if (snapshot.empty) {
-        // If Firestore is completely empty, seed it with the default static data
-        console.log("Database empty, seeding default products...");
-        setProducts(defaultProducts);
-        setIsLoaded(true);
-        
-        try {
-          const seedPromises = defaultProducts.map(async (prod) => {
-            // Use the original static ID as the document ID for consistency
-            const docRef = doc(db, 'products', prod.id.toString());
-            await setDoc(docRef, prod);
-          });
-          await Promise.all(seedPromises);
-        } catch (err) {
-          console.error("Failed to seed database. Check your Firestore rules:", err);
-        }
-      } else {
-        // Load data from Firestore
+      if (!snapshot.empty) {
         const loadedProducts = snapshot.docs.map(doc => ({
           ...doc.data(),
-          id: doc.id // Use Firestore document ID as the product ID
+          id: doc.id,
+          source: 'firestore'
         }));
-        
-        // Sort or process if needed, here we just set them
-        setProducts(loadedProducts);
-        setIsLoaded(true);
+        setFirestoreProducts(loadedProducts);
+      } else {
+        setFirestoreProducts([]);
       }
+      setIsFirestoreLoaded(true);
     }, (error) => {
       console.error("Error fetching products from Firestore:", error);
-      // Fallback to local data if there's an error (e.g. offline or missing config)
-      setProducts(defaultProducts);
-      setIsLoaded(true);
+      setIsFirestoreLoaded(true);
     });
 
     return () => unsubscribe();
   }, []);
+
+  // Combine products whenever either source changes
+  useEffect(() => {
+    setProducts([...firestoreProducts, ...sheetProducts]);
+    if (isFirestoreLoaded) setIsLoaded(true);
+  }, [firestoreProducts, sheetProducts, isFirestoreLoaded]);
 
   const addProduct = async (product) => {
     try {

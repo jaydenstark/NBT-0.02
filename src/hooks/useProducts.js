@@ -7,11 +7,12 @@ import { products as defaultProducts } from '../data/products';
 import Papa from 'papaparse';
 
 export function useProducts() {
-  const [products, setProducts] = useState([]);
   const [sheetProducts, setSheetProducts] = useState([]);
   const [firestoreProducts, setFirestoreProducts] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isFirestoreLoaded, setIsFirestoreLoaded] = useState(false);
+
+  const products = [...firestoreProducts, ...sheetProducts];
 
   useEffect(() => {
     // 1. Fetch from Google Sheets
@@ -76,19 +77,15 @@ export function useProducts() {
         setFirestoreProducts([]);
       }
       setIsFirestoreLoaded(true);
+      setIsLoaded(true);
     }, (error) => {
       console.error("Error fetching products from Firestore:", error);
       setIsFirestoreLoaded(true);
+      setIsLoaded(true);
     });
 
     return () => unsubscribe();
   }, []);
-
-  // Combine products whenever either source changes
-  useEffect(() => {
-    setProducts([...firestoreProducts, ...sheetProducts]);
-    if (isFirestoreLoaded) setIsLoaded(true);
-  }, [firestoreProducts, sheetProducts, isFirestoreLoaded]);
 
   const addProduct = async (product) => {
     try {

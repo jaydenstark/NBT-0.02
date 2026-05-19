@@ -3,61 +3,15 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import Papa from 'papaparse';
 
-export function useProducts() {
-  const [sheetProducts, setSheetProducts] = useState([]);
+export function useProducts(initialProducts = []) {
+  const [sheetProducts] = useState(initialProducts);
   const [firestoreProducts, setFirestoreProducts] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const products = [...firestoreProducts, ...sheetProducts];
 
   useEffect(() => {
-    // 1. Fetch from Google Sheets
-    const fetchGoogleSheets = async () => {
-      try {
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1pHzmSNsXpPdrJcGQ5kI4ZNsAaUNVeXt6knle7C_sNG0/export?format=csv&gid=1847675030';
-        const response = await fetch(sheetUrl);
-        const csvText = await response.text();
-        
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            const parsedProducts = [];
-            for (const row of results.data) {
-              if (!row.Name) continue;
-              
-              parsedProducts.push({
-                id: `sheet_${row.Name}_${row.Size}`,
-                name: row.Name,
-                brand: row.Brand || 'Neat Product',
-                type: row.Type?.toLowerCase() === 'industrial' ? 'industrial' : 'retail',
-                category: row.Category || 'General',
-                description: row.Description || '',
-                image: row.Image || '/PRODUCTS%20/Neat/neat-all-purpose-floral-2l.png',
-                sizes: [
-                  {
-                    size: row.Size || '1',
-                    price: parseFloat(String(row.Price || '0').replace(/[^0-9.]/g, '')) || 0,
-                    qtyInBox: parseInt(row['Qty In Box'] || row.QtyInBox) || 1
-                  }
-                ],
-                source: 'sheet'
-              });
-            }
-            setSheetProducts(parsedProducts);
-          },
-          error: (error) => {
-            console.error("Error parsing Google Sheet CSV:", error);
-          }
-        });
-      } catch (error) {
-        console.error("Failed to fetch Google Sheet:", error);
-      }
-    };
-
-    fetchGoogleSheets();
 
     // 2. Reference to the 'products' collection in Firestore
     const productsRef = collection(db, 'products');

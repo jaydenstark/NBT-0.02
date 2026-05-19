@@ -1,4 +1,5 @@
 import './globals.css';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export const metadata = {
   metadataBase: new URL('https://neatbrandtrade.com'),
@@ -88,6 +89,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
+        <GoogleAnalytics gaId="G-4TD08NQ7DF" />
       </body>
     </html>
   );

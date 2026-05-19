@@ -1,16 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { products as defaultProducts } from '../data/products';
 import Papa from 'papaparse';
 
 export function useProducts() {
   const [sheetProducts, setSheetProducts] = useState([]);
   const [firestoreProducts, setFirestoreProducts] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isFirestoreLoaded, setIsFirestoreLoaded] = useState(false);
 
   const products = [...firestoreProducts, ...sheetProducts];
 
@@ -76,11 +74,9 @@ export function useProducts() {
       } else {
         setFirestoreProducts([]);
       }
-      setIsFirestoreLoaded(true);
       setIsLoaded(true);
     }, (error) => {
       console.error("Error fetching products from Firestore:", error);
-      setIsFirestoreLoaded(true);
       setIsLoaded(true);
     });
 

@@ -1,6 +1,7 @@
 import './globals.css';
 
 export const metadata = {
+  metadataBase: new URL('https://neatbrandtrade.com'),
   title: 'Neat Brand Trade | Buy Premium Cleaning & Industrial Chemicals',
   description: 'Shop premium retail cleaning products and bulk industrial chemicals. Direct from manufacturer. Wholesale pricing available in 5L, 25L, and tons. Call/WhatsApp 0246272115 to order today!',
   keywords: 'cleaning chemicals, industrial chemicals, buy bleach ghana, neat brand trade, wholesale chemicals, bulk cleaning products, home care, fabric care',
